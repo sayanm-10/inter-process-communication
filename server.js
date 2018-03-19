@@ -1,23 +1,17 @@
+const redisPubSub = require("./redis_connection");
 const express = require("express");
 const app = express();
 
 app.get("/api/people/:id", async (req, res) => {
     try {
-        const promise = delayGetById(req.params.id);
-        const data = await promise.then(
-            resolve => {
-                return resolve
-            },
-            reject =>  {
-                res.status(500);
-                throw "Someone broke a promise to get by id";
+        redisPubSub.emit("get-user", {id: req.params.id});
+        redisPubSub.on("user-found", (data, channel) => {
+            if (data.user.length > 0) {
+                res.status(200).json(data.user);
+            } else {
+                res.status(404).json({error: "Record Not Found"});
+            }
         });
-
-        if (data.length > 0) {
-            res.status(200).json(data[0]);
-        } else {
-            res.status(404).json({error: "Record Not Found"});
-        }
     } catch (err) {
         // the server gave up!
         res.status(500).send();

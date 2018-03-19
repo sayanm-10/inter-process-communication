@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node worker.js && node server.js"
+    "server": "node server.js",
+    "worker": "node worker.js",
+    "start": "run-p server worker"
   },
   "repository": {
     "type": "git",
@@ -19,9 +21,8 @@
   "homepage": "https://github.com/sayanm-10/inter-process-communication#readme",
   "dependencies": {
     "axios": "^0.18.0",
-    "bluebird": "^3.5.1",
     "express": "^4.16.3",
     "node-redis-pubsub": "^2.0.0",
-    "redis": "^2.8.0"
+    "npm-run-all": "^4.1.2"
   }
 }
