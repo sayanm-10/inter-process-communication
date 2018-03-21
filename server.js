@@ -15,20 +15,41 @@ app.get("/api/people/:id", async (req, res) => {
     } catch (err) {
         // the server gave up!
         res.status(500).send();
-        console.log("Error /api/people/:id" + '/n' + err);
+        console.log("Error GET /api/people/:id" + '/n' + err);
     }
 });
 
 app.post("/api/people", async (req, res) => {
+    try {
 
+    } catch (err) {
+        
+    }
 });
 
 app.delete("/api/people/:id", async (req, res) => {
-
+    try {
+        redisPubSub.emit("del-user", {id: req.params.id});
+        redisPubSub.on("del-confirmed", (data, channel) => {
+            if (data.deleted) {
+                res.status(200).json({success : "User deleted!"});
+            } else {
+                res.status(500).json({error: "Deletion unsuccessful! Try again."});
+            }
+        });
+    } catch (err) {
+        // the server gave up!
+        res.status(500).send();
+        console.log("Error DELETE /api/people/:id" + '/n' + err);
+    }
 });
 
 app.put("/api/people/:id", async(req, res) => {
+    try {
 
+    } catch (err) {
+        
+    }
 });
 
 app.get('*', (req, res) => {
