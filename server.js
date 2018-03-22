@@ -21,9 +21,18 @@ app.get("/api/people/:id", async (req, res) => {
 
 app.post("/api/people", async (req, res) => {
     try {
-
+        redisPubSub.emit("new-user", {user: req.params.user});
+        redisPubSub.on("user-added", (data, channel) => {
+            if (data.user) {
+                res.status(200).json({user : data.user});
+            } else {
+                res.status(400).json({error: "Unable to add user! Try again."});
+            } // 403 for duplicate
+        });
     } catch (err) {
-        
+        // the server gave up!
+        res.status(500).send();
+        console.log("Error POST /api/people" + '/n' + err);
     }
 });
 
