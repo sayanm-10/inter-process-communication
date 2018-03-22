@@ -12,7 +12,7 @@ app.get("/api/people/:id", async (req, res) => {
             if (data.user.length > 0) {
                 res.status(200).json(data.user).end();
             } else {
-                res.status(404).json({error: "Record Not Found"}).end();
+                res.status(404).json({error: "User Not Found"}).end();
             }
         });
     } catch (err) {
