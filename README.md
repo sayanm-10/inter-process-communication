@@ -69,9 +69,13 @@ Message: {error: "Deletion unsuccessful! Try again."}
 
 This API will publish a message to request that the worker creates a person, and render JSON of the person created (or an error, should one occur).
 
-*Pass all parameters id, first_name, last_name, email, gender, ip_address for successful update*
-*Set Header: Content-Type application/json*
-*Pass json data in the body by slecting raw format*
+**NOTE**
+
+1. *Pass all parameters id, first_name, last_name, email, gender, ip_address for successful update*
+
+2. *Set Header: Content-Type application/json*
+
+3. *Pass json data in the body by selecting raw format*
 
 **SUCCESS**
 
