@@ -65,17 +65,10 @@ redisPubSub.on("update-user", async(data, channel) => {
         return;
     }
 
-    console.log("User ID", data.id);    
-
-    const userIndex = UserData.findIndex(user => {
-        user.id === parseInt(data.id);
-    });
-
-    console.log("User ", userIndex);    
+    const userIndex = UserData.findIndex(user => user.id === parseInt(data.id));
 
     if (userIndex > -1) {
         let existingUser = UserData[userIndex];
-        console.log("User ", userIndex);
         if (data.userData.first_name) {
             existingUser.first_name = data.userData.first_name;
         }

@@ -56,7 +56,7 @@ app.post("/api/people", async (req, res) => {
         redisPubSub.on("dupe-found", (data, channel) => {            
             res.status(403).json({error: "User already exists! Try updating using id."}).end();
         });
-        redisPubSub.on("user-added", async (data, channel) => {
+        redisPubSub.on("user-added", (data, channel) => {
             if (Object.keys(data.user).length > 0) {
                 res.status(200).json(data.user).end();
             } else {
@@ -75,7 +75,7 @@ app.delete("/api/people/:id", async (req, res) => {
         res.status(400).json({error: "Id is not an integer"}).end();
         return;
     }
-    
+
     try {
         redisPubSub.emit("del-user", {id: req.params.id});
         redisPubSub.on("del-confirmed", (data, channel) => {
@@ -107,13 +107,13 @@ app.put("/api/people/:id", async(req, res) => {
     try {
         redisPubSub.emit("update-user", {id: req.params.id, userData: userData});
         redisPubSub.on("update-failed", (data, channel) => {
-            req.status(400).json({error : "User not found."}).end();
+            res.status(400).json({error : "User not found."}).end();
         });
-        redisPubSub.on("update-confirmed", async (data, channel) => {
+        redisPubSub.on("update-confirmed", (data, channel) => {
             if (Object.keys(data.user).length > 0) {
-                req.status(200).json(data.user).end();
+                res.status(200).json(data.user).end();
             } else {
-                req.status(400).json({error : "Could not update record."}).end();
+                res.status(400).json({error : "Could not update record."}).end();
             }
         });
 
