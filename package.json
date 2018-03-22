@@ -21,6 +21,7 @@
   "homepage": "https://github.com/sayanm-10/inter-process-communication#readme",
   "dependencies": {
     "axios": "^0.18.0",
+    "body-parser": "^1.18.2",
     "express": "^4.16.3",
     "node-redis-pubsub": "^2.0.0",
     "npm-run-all": "^4.1.2"

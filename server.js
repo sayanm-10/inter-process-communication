@@ -1,6 +1,9 @@
 const redisPubSub = require("./redis_connection");
 const express = require("express");
+const bodyParser = require("body-parser");
+
 const app = express();
+app.use(bodyParser.json());
 
 app.get("/api/people/:id", async (req, res) => {
     try {
@@ -20,14 +23,32 @@ app.get("/api/people/:id", async (req, res) => {
 });
 
 app.post("/api/people", async (req, res) => {
+    const user = req.body;
+
+    if (Object.keys(user).length === 0) { // object is not empty
+        res.status(400).json({error: "Error! Missing user data"});
+    } else if (!user.id) {
+        res.status(400).json({error: "Error! Missing id"});
+    } else if (!user.first_name) {
+        res.status(400).json({error: "Error! Missing first name"});
+    } else if (!user.last_name) {
+        res.status(400).json({error: "Error! Missing last name"});
+    } else if (!user.email) {
+        res.status(400).json({error: "Error! Missing email"});
+    } else if (!user.gender) {
+        res.status(400).json({error: "Error! Missing gender"});
+    } else if (!user.ip_address) {
+        res.status(400).json({error: "Error! Missing ip address"});
+    }
+
     try {
-        redisPubSub.emit("new-user", {user: req.params.user});
+        redisPubSub.emit("new-user", {user: req.body});
         redisPubSub.on("user-added", (data, channel) => {
             if (data.user) {
-                res.status(200).json({user : data.user});
-            } else {
-                res.status(400).json({error: "Unable to add user! Try again."});
-            } // 403 for duplicate
+                res.status(200).json(data.user);
+            } else if (data.isDuplicate) {
+                res.status(403).json({error: "User already exists! Try updating using id."});
+            }
         });
     } catch (err) {
         // the server gave up!

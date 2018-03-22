@@ -36,4 +36,28 @@ redisPubSub.on("del-user", async (data, channel) => {
     redisPubSub.emit("del-confirmed", {deleted: true});
 });
 
+redisPubSub.on("new-user", async(data, channel) => {
+    if (!UserData) {
+        redisPubSub.emit("user-added", {user : ""});
+        return;
+    }
+
+    let newUser = {
+        id: data.user.id,
+        first_name: data.user.first_name,
+        last_name: data.user.last_name,
+        email: data.user.email,
+        gender: data.user.gender,
+        ip_address: data.user.ip_address
+    }
+
+    UserData.push(newUser);
+
+    redisPubSub.emit("user-added", {user: newUser});
+});
+
+redisPubSub.on("update-user", async(data, channel) => {
+
+});
+
 init();
