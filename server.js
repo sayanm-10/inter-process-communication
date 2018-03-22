@@ -26,28 +26,32 @@ app.post("/api/people", async (req, res) => {
     const user = req.body;
 
     if (Object.keys(user).length === 0) { // object is not empty
-        res.status(400).json({error: "Error! Missing user data"});
+        res.status(400).json({error: "Missing user data"});
     } else if (!user.id) {
-        res.status(400).json({error: "Error! Missing id"});
+        res.status(400).json({error: "Missing id"});
     } else if (!user.first_name) {
-        res.status(400).json({error: "Error! Missing first name"});
+        res.status(400).json({error: "Missing first name"});
     } else if (!user.last_name) {
-        res.status(400).json({error: "Error! Missing last name"});
+        res.status(400).json({error: "Missing last name"});
     } else if (!user.email) {
-        res.status(400).json({error: "Error! Missing email"});
+        res.status(400).json({error: "Missing email"});
     } else if (!user.gender) {
-        res.status(400).json({error: "Error! Missing gender"});
+        res.status(400).json({error: "Missing gender"});
     } else if (!user.ip_address) {
-        res.status(400).json({error: "Error! Missing ip address"});
+        res.status(400).json({error: "Missing ip address"});
+    } else if(isNaN(parseInt(user.id))) {
+        res.status(400).json({error: "Enter integer ID"});
     }
 
     try {
         redisPubSub.emit("new-user", {user: req.body});
         redisPubSub.on("user-added", (data, channel) => {
-            if (data.user) {
+            if (Object.keys(data.user).length > 0) {
                 res.status(200).json(data.user);
             } else if (data.isDuplicate) {
                 res.status(403).json({error: "User already exists! Try updating using id."});
+            } else {
+                res.status(400).json({error: "Unable to add user."});
             }
         });
     } catch (err) {

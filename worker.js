@@ -5,7 +5,7 @@ const DataUrl = "https://gist.githubusercontent.com/philbarresi/5cf15393d245b38a
 let UserData = null;
 
 const init = async () => {
-    // download dummy data
+    // download data
     const userJson = await axios.get(DataUrl);
     UserData = userJson.data;
 };
@@ -43,7 +43,7 @@ redisPubSub.on("new-user", async(data, channel) => {
     }
 
     let newUser = {
-        id: data.user.id,
+        id: parseInt(data.user.id),
         first_name: data.user.first_name,
         last_name: data.user.last_name,
         email: data.user.email,
@@ -52,7 +52,6 @@ redisPubSub.on("new-user", async(data, channel) => {
     }
 
     UserData.push(newUser);
-
     redisPubSub.emit("user-added", {user: newUser});
 });
 
