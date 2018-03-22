@@ -50,9 +50,13 @@ redisPubSub.on("new-user", async(data, channel) => {
         gender: data.user.gender,
         ip_address: data.user.ip_address
     }
-
-    UserData.push(newUser);
-    redisPubSub.emit("user-added", {user: newUser});
+    
+    if (UserData.some(user => user.id === newUser.id)) { // catch duplicate user
+        redisPubSub.emit("dupe-found", {});
+    } else {
+        UserData.push(newUser);
+        redisPubSub.emit("user-added", {user: newUser});
+    }
 });
 
 redisPubSub.on("update-user", async(data, channel) => {

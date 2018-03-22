@@ -45,11 +45,12 @@ app.post("/api/people", async (req, res) => {
 
     try {
         redisPubSub.emit("new-user", {user: req.body});
-        redisPubSub.on("user-added", (data, channel) => {
+        redisPubSub.on("dupe-found", (data, channel) => {            
+            res.status(403).json({error: "User already exists! Try updating using id."});
+        });
+        redisPubSub.on("user-added", async (data, channel) => {
             if (Object.keys(data.user).length > 0) {
                 res.status(200).json(data.user);
-            } else if (data.isDuplicate) {
-                res.status(403).json({error: "User already exists! Try updating using id."});
             } else {
                 res.status(400).json({error: "Unable to add user."});
             }
