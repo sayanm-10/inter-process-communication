@@ -60,7 +60,42 @@ redisPubSub.on("new-user", async(data, channel) => {
 });
 
 redisPubSub.on("update-user", async(data, channel) => {
+    if (!UserData) {
+        redisPubSub.emit("update-failed", {});
+        return;
+    }
 
+    console.log("User ID", data.id);    
+
+    const userIndex = UserData.findIndex(user => {
+        user.id === parseInt(data.id);
+    });
+
+    console.log("User ", userIndex);    
+
+    if (userIndex > -1) {
+        let existingUser = UserData[userIndex];
+        console.log("User ", userIndex);
+        if (data.userData.first_name) {
+            existingUser.first_name = data.userData.first_name;
+        }
+        if (data.userData.last_name) {
+            existingUser.last_name = data.userData.last_name;
+        }
+        if (data.userData.email) {
+            existingUser.email = data.userData.email;
+        }
+        if (data.userData.gender) {
+            existingUser.gender = data.userData.gender;
+        }
+        if (data.userData.ip_address) {
+            existingUser.ip_address = data.userData.ip_address;
+        }
+
+        redisPubSub.emit("update-confirmed", {user: existingUser});
+    } else {
+        redisPubSub.emit("update-failed", {});
+    }
 });
 
 init();

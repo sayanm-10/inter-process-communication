@@ -10,9 +10,9 @@ app.get("/api/people/:id", async (req, res) => {
         redisPubSub.emit("get-user", {id: req.params.id});
         redisPubSub.on("user-found", (data, channel) => {
             if (data.user.length > 0) {
-                res.status(200).json(data.user);
+                res.status(200).json(data.user).end();
             } else {
-                res.status(404).json({error: "Record Not Found"});
+                res.status(404).json({error: "Record Not Found"}).end();
             }
         });
     } catch (err) {
@@ -26,33 +26,34 @@ app.post("/api/people", async (req, res) => {
     const user = req.body;
 
     if (Object.keys(user).length === 0) { // object is not empty
-        res.status(400).json({error: "Missing user data"});
+        res.status(400).json({error: "Missing user data"}).end();
     } else if (!user.id) {
-        res.status(400).json({error: "Missing id"});
+        res.status(400).json({error: "Missing id"}).end();
     } else if (!user.first_name) {
-        res.status(400).json({error: "Missing first name"});
+        res.status(400).json({error: "Missing first name"}).end();
     } else if (!user.last_name) {
-        res.status(400).json({error: "Missing last name"});
+        res.status(400).json({error: "Missing last name"}).end();
     } else if (!user.email) {
-        res.status(400).json({error: "Missing email"});
+        res.status(400).json({error: "Missing email"}).end();
     } else if (!user.gender) {
-        res.status(400).json({error: "Missing gender"});
+        res.status(400).json({error: "Missing gender"}).end();
     } else if (!user.ip_address) {
-        res.status(400).json({error: "Missing ip address"});
+        res.status(400).json({error: "Missing ip address"}).end();
+        return;
     } else if(isNaN(parseInt(user.id))) {
-        res.status(400).json({error: "Enter integer ID"});
+        res.status(400).json({error: "Enter integer ID"}).end();
     }
 
     try {
         redisPubSub.emit("new-user", {user: req.body});
         redisPubSub.on("dupe-found", (data, channel) => {            
-            res.status(403).json({error: "User already exists! Try updating using id."});
+            res.status(403).json({error: "User already exists! Try updating using id."}).end();
         });
         redisPubSub.on("user-added", async (data, channel) => {
             if (Object.keys(data.user).length > 0) {
-                res.status(200).json(data.user);
+                res.status(200).json(data.user).end();
             } else {
-                res.status(400).json({error: "Unable to add user."});
+                res.status(400).json({error: "Unable to add user."}).end();
             }
         });
     } catch (err) {
@@ -67,9 +68,9 @@ app.delete("/api/people/:id", async (req, res) => {
         redisPubSub.emit("del-user", {id: req.params.id});
         redisPubSub.on("del-confirmed", (data, channel) => {
             if (data.deleted) {
-                res.status(200).json({success : "User deleted!"});
+                res.status(200).json({success : "User deleted!"}).end();
             } else {
-                res.status(404).json({error: "Deletion unsuccessful! Try again."});
+                res.status(404).json({error: "Deletion unsuccessful! Try again."}).end();
             }
         });
     } catch (err) {
@@ -80,15 +81,35 @@ app.delete("/api/people/:id", async (req, res) => {
 });
 
 app.put("/api/people/:id", async(req, res) => {
+    const userData = req.body;
+
+    if (Object.keys(userData).length === 0) { // object is not empty
+        res.status(400).json({error: "Missing user data"}).end();
+        return;
+    }
+
     try {
+        redisPubSub.emit("update-user", {id: req.params.id, userData: userData});
+        redisPubSub.on("update-failed", (data, channel) => {
+            req.status(400).json({error : "User not found."}).end();
+        });
+        redisPubSub.on("update-confirmed", async (data, channel) => {
+            if (Object.keys(data.user).length > 0) {
+                req.status(200).json(data.user).end();
+            } else {
+                req.status(400).json({error : "Could not update record."}).end();
+            }
+        });
 
     } catch (err) {
-        
+        // the server gave up!
+        res.status(500).send();
+        console.log("Error PUT /api/people/:id" + '/n' + err);
     }
 });
 
 app.get('*', (req, res) => {
-    res.status(404).json({error: "404 Page Not Found"});
+    res.status(404).json({error: "404 Page Not Found"}).end();
 });
 
 app.listen(3000, () => {
