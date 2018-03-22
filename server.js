@@ -27,21 +27,28 @@ app.post("/api/people", async (req, res) => {
 
     if (Object.keys(user).length === 0) { // object is not empty
         res.status(400).json({error: "Missing user data"}).end();
+        return;
     } else if (!user.id) {
         res.status(400).json({error: "Missing id"}).end();
+        return;
     } else if (!user.first_name) {
         res.status(400).json({error: "Missing first name"}).end();
+        return;
     } else if (!user.last_name) {
         res.status(400).json({error: "Missing last name"}).end();
+        return;
     } else if (!user.email) {
         res.status(400).json({error: "Missing email"}).end();
+        return;
     } else if (!user.gender) {
         res.status(400).json({error: "Missing gender"}).end();
+        return;
     } else if (!user.ip_address) {
         res.status(400).json({error: "Missing ip address"}).end();
         return;
     } else if(isNaN(parseInt(user.id))) {
-        res.status(400).json({error: "Enter integer ID"}).end();
+        res.status(400).json({error: "Id is not an integer"}).end();
+        return;
     }
 
     try {
@@ -64,6 +71,11 @@ app.post("/api/people", async (req, res) => {
 });
 
 app.delete("/api/people/:id", async (req, res) => {
+    if (isNaN(parseInt(req.params.id))) {
+        res.status(400).json({error: "Id is not an integer"}).end();
+        return;
+    }
+    
     try {
         redisPubSub.emit("del-user", {id: req.params.id});
         redisPubSub.on("del-confirmed", (data, channel) => {
@@ -85,6 +97,10 @@ app.put("/api/people/:id", async(req, res) => {
 
     if (Object.keys(userData).length === 0) { // object is not empty
         res.status(400).json({error: "Missing user data"}).end();
+        return;
+    }
+    if (isNaN(parseInt(req.params.id))) {
+        res.status(400).json({error: "Id is not an integer"}).end();
         return;
     }
 
