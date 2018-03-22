@@ -34,7 +34,7 @@ app.delete("/api/people/:id", async (req, res) => {
             if (data.deleted) {
                 res.status(200).json({success : "User deleted!"});
             } else {
-                res.status(500).json({error: "Deletion unsuccessful! Try again."});
+                res.status(404).json({error: "Deletion unsuccessful! Try again."});
             }
         });
     } catch (err) {

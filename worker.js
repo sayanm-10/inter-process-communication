@@ -11,14 +11,29 @@ const init = async () => {
 };
 
 redisPubSub.on("get-user", async (data, channel) => {
-    if (!UserData) return;
+    if (!UserData) {
+        redisPubSub.emit("user-found", {user : ""});
+        return;
+    }
 
-    console.log("Finding user");
      const user = UserData.filter(user => {
         return user.id === parseInt(data.id);
     });
 
     redisPubSub.emit("user-found", { user: user });
+});
+
+redisPubSub.on("del-user", async (data, channel) => {
+    if (!UserData) {
+        redisPubSub.emit("del-confirmed", {deleted: false});
+        return;
+    }
+
+    UserData = UserData.filter(user => {
+        return user.id !== parseInt(data.id);
+    });
+
+    redisPubSub.emit("del-confirmed", {deleted: true});
 });
 
 init();
