@@ -29,11 +29,16 @@ redisPubSub.on("del-user", async (data, channel) => {
         return;
     }
 
-    UserData = UserData.filter(user => {
-        return user.id !== parseInt(data.id);
-    });
+    if (UserData.some(user => user.id === parseInt(data.id))) { // check if user exists
+        UserData = UserData.filter(user => {
+            return user.id !== parseInt(data.id);
+        });
+        
+        redisPubSub.emit("del-confirmed", {deleted: true});
+    } else {
+        redisPubSub.emit("del-confirmed", {deleted: false});
+    }
 
-    redisPubSub.emit("del-confirmed", {deleted: true});
 });
 
 redisPubSub.on("new-user", async(data, channel) => {
